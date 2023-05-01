@@ -13,7 +13,7 @@ setup(
     url="https://github.com/nicklly/nonebot_plugin_star_rail_calendar",
     author="TonyKun",
     author_email="1134741727@qq.com",
-    packages=find_packages(),
+    packages=find_packages(include=["template","template.*"]),
     include_package_data=True,
     platforms="any",
     install_requires=[
