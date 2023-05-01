@@ -1,35 +1,25 @@
 <div align="center">
 
-# 原神活动日历
+# 《崩坏：星穹铁道》活动日历
 
 </div>
 
-
-## 版本
-
-v0.0.1<br>
- ⚠ 适配nonebot2-2.0.0beta2版本；
 
 ## 安装
 
 通过 `nb`或 `pip` 命令安装插件
 
-`pip install nonebot_plugin_covid`
+`pip install nonebot_plugin_star_rail`
 <br>或<br>
-`nb plugin install nonebot_plugin_covid`
+`nb plugin install nonebot_plugin_star_rail`
 
 ## 命令
 
-`原神日历` 查看本群订阅服务器日历<br>
-`原神日历 on/off` 订阅/取消指定服务器的日历推送<br>
-`原神日历 time 时:分`  设置原神日历推送时间<br>
-`原神日历 status`  查看原神日历推送设置
-
-
-## 项目原地址
-
-<a href='https://github.com/NepPure'>@NepPure</a> https://github.com/NepPure
+`<星穹/星琼>日历` 查看本群订阅服务器日历<br>
+`<星穹/星琼>日历 on/off` 订阅/取消指定服务器的日历推送<br>
+`<星穹/星琼>日历 time 时:分`  设置原神日历推送时间<br>
+`<星穹/星琼>日历 status`  查看原神日历推送设置
 
 
 ### 功能演示
-![calendar](preview.png)
+![calendar](preview.jpg)
