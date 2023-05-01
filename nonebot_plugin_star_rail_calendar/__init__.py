@@ -9,13 +9,16 @@ from .calendar_config import config
 from .utils import *
 from .draw_calendar import *
 
-HELP_STR = '''
-原神活动日历
-原神日历 : 查看本群订阅服务器日历
-原神日历 on/off : 订阅/取消订阅指定服务器的日历推送
-原神日历 time 时:分 : 设置日历推送时间
-原神日历 status : 查看本群日历推送设置
-'''.strip()
+__plugin_meta__ = PluginMetadata(
+    name="星穹铁道活动日历",
+    description="查看《崩坏：星穹铁道》活动",
+    usage="<星穹/星琼>日历",
+    extra={
+        'author':   'TonyKun',
+        'version':  '1.0',
+        'priority': 24,
+    },
+)
 
 driver = nonebot.get_driver()
 scheduler = AsyncIOScheduler()
