@@ -1,0 +1,2 @@
+graft nonebot_plugin_genshin_calendar
+prune nonebot_plugin_genshin_calendar/.git
