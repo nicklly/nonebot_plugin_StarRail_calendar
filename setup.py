@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="nonebot-plugin-starrail-calendar",
-    version="1.0.1",
+    version="1.0.3",
     keywords=["pip", "nonebot-plugin-starrail-calendar"],
     description="查看《崩坏：星穹铁道》官方活动",
     long_description="查看《崩坏：星穹铁道》官方活动",
@@ -13,7 +13,7 @@ setup(
     url="https://github.com/nicklly/nonebot_plugin_StarRail_calendar",
     author="TonyKun",
     author_email="1134741727@qq.com",
-    packages=find_packages(include=["template", "template.*"]),
+    packages=find_packages(),
     include_package_data=True,
     platforms="any",
     install_requires=[
