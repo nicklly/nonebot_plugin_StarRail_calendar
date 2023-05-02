@@ -17,8 +17,8 @@ setup(
     include_package_data=True,
     platforms="any",
     install_requires=[
-        "nonebot2 >= 2.0.0b1",
-        "nonebot-adapter-onebot >= 2.0.0b1",
+        "nonebot2 == 2.0.0rc4",
+        "nonebot-adapter-onebot == 2.2.2",
         "playwright == 1.32.1",
         "httpx == 0.23.3",
         "apscheduler == 3.10.1",
