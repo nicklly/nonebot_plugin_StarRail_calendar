@@ -9,9 +9,9 @@
 
 通过 `nb`或 `pip` 命令安装插件
 
-`pip install nonebot_plugin_star_rail`
+`pip install nonebot_plugin_star_rail_calendar`
 <br>或<br>
-`nb plugin install nonebot_plugin_star_rail`
+`nb plugin install nonebot_plugin_star_rail_calendar`
 
 ## 命令
 
