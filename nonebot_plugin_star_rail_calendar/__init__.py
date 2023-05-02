@@ -5,7 +5,8 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from nonebot import get_bot, on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, MessageEvent, Message, MessageSegment, ActionFailed
 from nonebot.params import CommandArg
-from .calendar_config import config
+from nonebot.plugin import PluginMetadata
+
 from .utils import *
 from .draw_calendar import *
 

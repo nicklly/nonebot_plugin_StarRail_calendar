@@ -1,12 +1,7 @@
 import os
 import asyncio
-import math
 import functools
-import re
 from datetime import datetime, timedelta
-from pathlib import Path
-
-from dateutil.relativedelta import relativedelta
 from .utils import get
 
 res = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'template')
@@ -110,7 +105,7 @@ async def load_event_cn():
                 'title': data['title'],
                 'banner': data['banner'],
                 'color': '#2196f3'
-                }
+            }
 
             if '活动跃迁开启' in data['title']:
                 event['color'] = '#73BF00'
@@ -119,7 +114,7 @@ async def load_event_cn():
             if '无名勋礼' in data['title']:
                 event['color'] = '#F00078'
                 event['banner'] = data['banner']
-                
+
             event_data['cn'].append(event)
         return 0
     return 1
@@ -163,10 +158,9 @@ async def get_events(server, offset, days):
     end -= timedelta(hours=18)  # 晚上12点结束
 
     for event in event_data[server]:
-            events.append(event)
+        events.append(event)
 
     return events
-
 
 
 if __name__ == '__main__':
