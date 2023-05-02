@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import jinja2
 from .browser import get_new_page
 from .data_source import *

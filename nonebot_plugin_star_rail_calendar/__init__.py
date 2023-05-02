@@ -19,7 +19,7 @@ __plugin_meta__ = PluginMetadata(
         'author':   'TonyKun',
         'version':  '1.0',
         'priority': 24,
-    },
+    }
 )
 
 driver = nonebot.get_driver()
