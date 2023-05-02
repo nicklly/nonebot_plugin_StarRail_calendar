@@ -1,12 +1,12 @@
 Metadata-Version: 2.1
-Name: nonebot-plugin-StarRail-calendar
-Version: 1.0.0
+Name: nonebot-plugin-starrail-calendar
+Version: 1.0.1
 Summary: 查看《崩坏：星穹铁道》官方活动
 Home-page: https://github.com/nicklly/nonebot_plugin_StarRail_calendar
 Author: TonyKun
 Author-email: 1134741727@qq.com
 License: GPL Licence
-Keywords: pip,nonebot_plugin_StarRail_calendar
+Keywords: pip,nonebot-plugin-starrail-calendar
 Platform: any
 License-File: LICENSE
 
