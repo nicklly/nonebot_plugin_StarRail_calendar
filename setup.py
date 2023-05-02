@@ -4,9 +4,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="nonebot_plugin_StarRail_calendar",
-    version="1.0.0",
-    keywords=["pip", "nonebot_plugin_StarRail_calendar"],
+    name="nonebot-plugin-starrail-calendar",
+    version="1.0.1",
+    keywords=["pip", "nonebot-plugin-starrail-calendar"],
     description="查看《崩坏：星穹铁道》官方活动",
     long_description="查看《崩坏：星穹铁道》官方活动",
     license="GPL Licence",
