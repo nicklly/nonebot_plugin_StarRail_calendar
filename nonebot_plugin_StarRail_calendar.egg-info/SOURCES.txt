@@ -1,0 +1,9 @@
+LICENSE
+MANIFEST.in
+README.md
+setup.py
+nonebot_plugin_StarRail_calendar.egg-info/PKG-INFO
+nonebot_plugin_StarRail_calendar.egg-info/SOURCES.txt
+nonebot_plugin_StarRail_calendar.egg-info/dependency_links.txt
+nonebot_plugin_StarRail_calendar.egg-info/requires.txt
+nonebot_plugin_StarRail_calendar.egg-info/top_level.txt
