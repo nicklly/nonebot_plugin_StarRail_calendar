@@ -81,11 +81,7 @@ async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = Comman
         im = await generate_day_schedule(server, viewport={"width": 600, "height": 10})
 
         try:
-            if group_id not in group_data or 'cardimage' not in group_data[group_id] or not group_data[group_id][
-                'cardimage']:
-                await calendar.finish(MessageSegment.image(im))
-            else:
-                await calendar.finish(f'[CQ:cardimage,file={im}]')
+            await calendar.finish(f'[CQ:cardimage,file={im}]')
         except ActionFailed as e:
             logging.error(e)
 
@@ -151,24 +147,16 @@ async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = Comman
 
         # 查询订阅推送状态
         elif action.group('action') == "status":
-            message = "订阅日历: {0}\n" \
-                      "推送时间: {1}:{2}".format(
-                group_data[group_id]['server_list'],
-                group_data[group_id]['hour'],
-                group_data[group_id]['minute']
-            )
-            await calendar.finish(message)
+            try:
+                message = "订阅日历: {0}\n" \
+                          "推送时间: {1}:{2}".format(
+                    group_data[group_id]['server_list'],
+                    group_data[group_id]['hour'],
+                    group_data[group_id]['minute']
+                )
+                await calendar.finish(message)
+            except KeyError as e:
+                await calendar.finish("当前Q群尚未开启日历推送，无法查看推送状态")
 
-        # 切换cardImage模式
-        elif action.group('action') == "cardimage":
-            if 'cardimage' not in group_data[group_id] or not group_data[group_id]['cardimage']:
-                group_data[group_id]['cardimage'] = True
-                save_data(group_data, 'data.json')
-                await calendar.finish('已切换为cardimage模式', at_sender=True)
-            else:
-                group_data[group_id]['cardimage'] = False
-                save_data(group_data, 'data.json')
-                await calendar.finish('已切换为标准image模式', at_sender=True)
-        else:
-            await calendar.finish('指令错误', at_sender=True)
+
 
