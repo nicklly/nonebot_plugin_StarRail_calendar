@@ -23,7 +23,10 @@ ignored_key_words = [
     '有奖问卷',
     '公平运营',
     '防沉迷',
-    '游戏优化'
+    '游戏优化',
+    '保密测试',
+    '社群',
+    '社媒聚合页'
 ]
 
 ignored_ann_ids = [
@@ -107,7 +110,7 @@ async def load_event_cn():
                 'color': '#2196f3'
             }
 
-            if '活动跃迁开启' in data['title']:
+            if '概率UP' in data['title']:
                 event['color'] = '#73BF00'
                 event['banner'] = data['banner']
 

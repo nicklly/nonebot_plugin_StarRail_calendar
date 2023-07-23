@@ -1,12 +1,12 @@
 import logging
 import nonebot
-import re
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from nonebot import get_bot, on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, MessageEvent, Message, MessageSegment, ActionFailed
 from nonebot.params import CommandArg
 from nonebot.plugin import PluginMetadata
+from .config import *
 
 from .utils import *
 from .draw_calendar import *
@@ -17,14 +17,14 @@ __plugin_meta__ = PluginMetadata(
     usage="<星穹/星琼>日历",
     extra={
         'author':   'TonyKun',
-        'version':  '1.0',
+        'version':  '1.1',
         'priority': 24,
     }
 )
 
 driver = nonebot.get_driver()
 scheduler = AsyncIOScheduler()
-calendar = on_command('星穹日历', aliases={"星穹日历", '星琼日历'}, priority=24, block=True)
+calendar = on_command('星穹日历', aliases={"星穹日历", '星琼日历', '星铁日历', '崩铁日历'}, priority=24, block=True)
 
 
 @driver.on_startup
@@ -36,18 +36,15 @@ async def _():
             trigger='cron',
             hour=group_data['hour'],
             minute=group_data['minute'],
-            id="star_rali_calendar_" + group_id,
+            id="starrali_calendar_" + group_id,
             args=(group_id, group_data),
             misfire_grace_time=10
         )
 
 
 async def send_calendar(group_id, group_data):
-    im = await generate_day_schedule('cn')
-    if 'cardimage' not in group_data or not group_data['cardimage']:
-        msg = MessageSegment.image(im)
-
-    await get_bot().send_group_msg(group_id=int(group_id), message=msg)
+    im = await generate_day_schedule('cn', viewport={"width": config.width, "height": config.height})
+    await get_bot().send_group_msg(group_id=int(group_id), message=MessageSegment.image(im))
 
 
 def update_group_schedule(group_id, group_data):
@@ -59,7 +56,7 @@ def update_group_schedule(group_id, group_data):
         func=send_calendar,
         trigger='cron',
         args=(group_id, group_data),
-        id=f'star_rali_calendar_{group_id}',
+        id=f'starrali_calendar_{group_id}',
         replace_existing=True,
         hour=group_data[group_id]['hour'],
         minute=group_data[group_id]['minute'],
@@ -69,6 +66,7 @@ def update_group_schedule(group_id, group_data):
 
 @calendar.handle()
 async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = CommandArg()):
+    import re
     if event.message_type == 'private':
         await calendar.finish('仅支持群聊模式下使用本指令')
 
@@ -78,10 +76,10 @@ async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = Comman
     fun = msg.extract_plain_text().strip()
     action = re.search(r'(?P<action>on|off|time|status|cardimage)', fun)
     if not fun:
-        im = await generate_day_schedule(server, viewport={"width": 600, "height": 10})
+        im = await generate_day_schedule(server, viewport={"width": config.width, "height": config.height})
 
         try:
-            await calendar.finish(f'[CQ:cardimage,file={im}]')
+            await calendar.finish(MessageSegment.image(im))
         except ActionFailed as e:
             logging.error(e)
 
@@ -95,13 +93,12 @@ async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = Comman
                 ],
                 'hour': 8,
                 'minute': 0,
-                'cardimage': False
             }
             if event.message_type == 'guild':
                 await calendar.finish("暂不支持频道内推送~")
 
-            if scheduler.get_job('star_rali_calendar_' + group_id):
-                scheduler.remove_job("star_rali_calendar_" + group_id)
+            if scheduler.get_job('starrali_calendar_' + group_id):
+                scheduler.remove_job("starrali_calendar_" + group_id)
             save_data(group_data, 'data.json')
 
             scheduler.add_job(
@@ -109,7 +106,7 @@ async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = Comman
                 trigger='cron',
                 hour=8,
                 minute=0,
-                id="star_rali_calendar_" + group_id,
+                id="starrali_calendar_" + group_id,
                 args=(group_id, group_data[group_id]),
                 misfire_grace_time=10
             )
@@ -119,15 +116,15 @@ async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = Comman
         # 关闭推送功能
         elif action.group('action') == 'off':
             del group_data[group_id]
-            if scheduler.get_job("star_rali_calendar_" + group_id):
-                scheduler.remove_job("star_rali_calendar_" + group_id)
+            if scheduler.get_job("starrali_calendar_" + group_id):
+                scheduler.remove_job("starrali_calendar_" + group_id)
             save_data(group_data, 'data.json')
             await calendar.finish('星穹日历推送已关闭', at_sender=True)
 
         # 设置推送时间
         elif action.group('action') == 'time':
             match = str(msg).split(" ")
-            time = re.search(r'(\d{1,2}):(\d{2})', match[1])
+            time = re.search(r'(\d{1,2}):(\d{2})', match[1]) or re.search(r'(\d{1,2})：(\d{2})', match[1])
 
             if time:
                 if not time or len(time.groups()) < 2:
