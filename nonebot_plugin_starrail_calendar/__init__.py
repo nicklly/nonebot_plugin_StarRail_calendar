@@ -2,10 +2,13 @@ import logging
 import nonebot
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from nonebot import get_bot, on_command
+from nonebot import get_bot, on_command, on_regex
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, MessageEvent, Message, MessageSegment, ActionFailed
 from nonebot.params import CommandArg
+from nonebot.permission import SUPERUSER
 from nonebot.plugin import PluginMetadata
+from nonebot.rule import to_me
+
 from .config import *
 
 from .utils import *
@@ -16,15 +19,17 @@ __plugin_meta__ = PluginMetadata(
     description="查看《崩坏：星穹铁道》活动",
     usage="<星穹/星琼>日历",
     extra={
-        'author':   'TonyKun',
-        'version':  '1.1',
+        'author': 'TonyKun',
+        'version': '1.1',
         'priority': 24,
     }
 )
 
 driver = nonebot.get_driver()
+server = 'cn'
 scheduler = AsyncIOScheduler()
 calendar = on_command('星穹日历', aliases={"星穹日历", '星琼日历', '星铁日历', '崩铁日历'}, priority=24, block=True)
+push = on_regex(r"^开启推送$|^关闭推送$", permission=SUPERUSER, rule=to_me(), priority=24, block=True)
 
 
 @driver.on_startup
@@ -40,6 +45,46 @@ async def _():
             args=(group_id, group_data),
             misfire_grace_time=10
         )
+
+
+@push.handle()
+async def _(event: GroupMessageEvent):
+    msg = event.get_plaintext()
+    group_id = str(event.group_id)
+    group_data = load_data('data.json')
+    if msg == '开启推送':
+        group_data[group_id] = {
+            'server_list': [
+                str(server)
+            ],
+            'hour': 8,
+            'minute': 0,
+        }
+        if event.message_type == 'guild':
+            await push.finish("暂不支持频道内推送~")
+
+        if scheduler.get_job('starrali_calendar_' + group_id):
+            scheduler.remove_job("starrali_calendar_" + group_id)
+        save_data(group_data, 'data.json')
+
+        scheduler.add_job(
+            func=send_calendar,
+            trigger='cron',
+            hour=8,
+            minute=0,
+            id="starrali_calendar_" + group_id,
+            args=(group_id, group_data[group_id]),
+            misfire_grace_time=10
+        )
+
+        await push.finish('星穹日历推送已开启, 默认推送时间为8点', at_sender=True)
+
+    elif msg == '关闭推送':
+        del group_data[group_id]
+        if scheduler.get_job("starrali_calendar_" + group_id):
+            scheduler.remove_job("starrali_calendar_" + group_id)
+        save_data(group_data, 'data.json')
+        await push.finish('星穹日历推送已关闭', at_sender=True)
 
 
 async def send_calendar(group_id, group_data):
@@ -72,9 +117,8 @@ async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = Comman
 
     group_id = str(event.group_id)
     group_data = load_data('data.json')
-    server = 'cn'
     fun = msg.extract_plain_text().strip()
-    action = re.search(r'(?P<action>on|off|time|status|cardimage)', fun)
+    action = re.search(r'(?P<action>on|off|time|status)', fun)
     if not fun:
         im = await generate_day_schedule(server, viewport={"width": config.width, "height": config.height})
 
@@ -84,45 +128,8 @@ async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = Comman
             logging.error(e)
 
     elif action:
-
-        # 添加定时推送任务
-        if action.group('action') == 'on':
-            group_data[group_id] = {
-                'server_list': [
-                    str(server)
-                ],
-                'hour': 8,
-                'minute': 0,
-            }
-            if event.message_type == 'guild':
-                await calendar.finish("暂不支持频道内推送~")
-
-            if scheduler.get_job('starrali_calendar_' + group_id):
-                scheduler.remove_job("starrali_calendar_" + group_id)
-            save_data(group_data, 'data.json')
-
-            scheduler.add_job(
-                func=send_calendar,
-                trigger='cron',
-                hour=8,
-                minute=0,
-                id="starrali_calendar_" + group_id,
-                args=(group_id, group_data[group_id]),
-                misfire_grace_time=10
-            )
-
-            await calendar.finish('星穹日历推送已开启', at_sender=True)
-
-        # 关闭推送功能
-        elif action.group('action') == 'off':
-            del group_data[group_id]
-            if scheduler.get_job("starrali_calendar_" + group_id):
-                scheduler.remove_job("starrali_calendar_" + group_id)
-            save_data(group_data, 'data.json')
-            await calendar.finish('星穹日历推送已关闭', at_sender=True)
-
         # 设置推送时间
-        elif action.group('action') == 'time':
+        if action.group('action') == 'time':
             match = str(msg).split(" ")
             time = re.search(r'(\d{1,2}):(\d{2})', match[1]) or re.search(r'(\d{1,2})：(\d{2})', match[1])
 
@@ -154,6 +161,3 @@ async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = Comman
                 await calendar.finish(message)
             except KeyError as e:
                 await calendar.finish("当前Q群尚未开启日历推送，无法查看推送状态")
-
-
-
