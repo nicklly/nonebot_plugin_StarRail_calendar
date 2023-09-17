@@ -37,12 +37,25 @@ async def generate_day_schedule(server='cn', **kwargs):
         })
 
     template = env.get_template('calendar.html')
+
     for event in events:
+        if event['left_days'] < 0:
+            time = '永久开放'
+        else:
+            time = '即将结束' if event["left_days"] == 0 else f'{str(event["left_days"])}天后结束'
+        if event['start'] is None:
+            online = ''
+        else:
+            online = f'{event["start"]} - {datetime.strftime(event["end"], r"%m-%d")}'
+
         body.append({
             'title': event['title'],
             'color': event['color'],
-            'banner': event['banner']
+            'banner': event['banner'],
+            'online': online,
+            'time': time
         })
+
     content = await template.render_async(body=body, css_path=template_path, week=weeks)
 
     async with get_new_page(**kwargs) as page:

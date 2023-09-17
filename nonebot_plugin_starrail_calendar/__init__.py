@@ -28,7 +28,7 @@ __plugin_meta__ = PluginMetadata(
 driver = nonebot.get_driver()
 server = 'cn'
 scheduler = AsyncIOScheduler()
-calendar = on_command('星穹日历', aliases={"星穹日历", '星琼日历', '星铁日历', '崩铁日历'}, priority=24, block=True)
+calendar = on_command('星穹日历', aliases={"sr日历", "星穹日历", '星琼日历', '星铁日历', '崩铁日历'}, priority=24, block=True)
 push = on_regex(r"^开启推送$|^关闭推送$", permission=SUPERUSER, rule=to_me(), priority=24, block=True)
 
 

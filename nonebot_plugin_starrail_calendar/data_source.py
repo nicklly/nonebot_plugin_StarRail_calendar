@@ -1,6 +1,8 @@
+import math
 import os
 import asyncio
 import functools
+import re
 from datetime import datetime, timedelta
 from .utils import get
 
@@ -104,18 +106,46 @@ async def load_event_cn():
             if ignore:
                 continue
 
+            if event_detail[data["ann_id"]]:
+                content = event_detail[data["ann_id"]]['content']
+                searchObj = re.search(
+                    r'(\d+)\/(\d+)\/(\d+)\s(\d+):(\d+):(\d+)', content, re.M | re.I)
+                try:
+                    datelist = searchObj.groups()  # ('2021', '9', '17')
+                    ctime = datetime.strptime(
+                            f'{datelist[0]}-{datelist[1]}-{datelist[2]} {datelist[3]}:{datelist[4]}:{datelist[5]}', r"%Y-%m-%d %H:%M:%S")
+                except Exception as e:
+                    pass
+
             event = {
                 'title': data['title'],
                 'banner': data['banner'],
-                'color': '#2196f3'
+                'color': '#2196f3',
+                'start': None,
+                'end': ctime
             }
-
             if '概率UP' in data['title']:
+                event['start'] = '版本更新后'
                 event['color'] = '#73BF00'
                 event['banner'] = data['banner']
 
             if '无名勋礼' in data['title']:
+                event['start'] = '版本更新后'
                 event['color'] = '#F00078'
+                event['banner'] = data['banner']
+
+            if '位面分裂' in data['title']:
+                content = event_detail[data["ann_id"]]['content']
+                Obj = re.findall(r'&lt;t class=\"t_lc\"&gt;(\d+)\/(\d+)\/(\d+)\s(\d+):(\d+):(\d+)&lt;/t&gt;', content)
+
+                start = datetime.strptime(
+                        f'{Obj[0][0]}-{Obj[0][1]}-{Obj[0][2]} {Obj[0][3]}:{Obj[0][4]}:{Obj[0][5]}', r"%Y-%m-%d %H:%M:%S")
+                end = datetime.strptime(
+                        f'{Obj[1][0]}-{Obj[1][1]}-{Obj[1][2]} {Obj[1][3]}:{Obj[1][4]}:{Obj[1][5]}', r"%Y-%m-%d %H:%M:%S")
+
+                event['start'] = datetime.strftime(start, r"%m-%d")
+                event['end'] = end
+                event['color'] = '#E9AB17'
                 event['banner'] = data['banner']
 
             event_data['cn'].append(event)
@@ -127,16 +157,6 @@ async def load_event(server):
     if server == 'cn':
         return await load_event_cn()
     return 1
-
-
-def get_pcr_now(offset):
-    pcr_now = datetime.now()
-    if pcr_now.hour < 4:
-        pcr_now -= timedelta(days=1)
-    pcr_now = pcr_now.replace(
-        hour=18, minute=0, second=0, microsecond=0)  # 用晚6点做基准
-    pcr_now = pcr_now + timedelta(days=offset)
-    return pcr_now
 
 
 async def get_events(server, offset, days):
@@ -161,17 +181,7 @@ async def get_events(server, offset, days):
     end -= timedelta(hours=18)  # 晚上12点结束
 
     for event in event_data[server]:
+        event['left_days'] = math.floor((event['end'] - start) / timedelta(days=1))  # 还有几天结束
         events.append(event)
 
     return events
-
-
-if __name__ == '__main__':
-    async def main():
-        event = await get_events('cn', 0, 15)
-        print(event)
-
-
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(main())
