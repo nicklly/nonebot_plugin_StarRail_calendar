@@ -4,16 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c392f812-711b-4664-9ff0-df0809c40114" name="变更" comment="">
+    <list default="true" id="c392f812-711b-4664-9ff0-df0809c40114" name="变更" comment="更新ctime错误">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MANIFEST.in" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/browser.py" beforeDir="false" afterPath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/browser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/data_source.py" beforeDir="false" afterPath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/data_source.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/draw_calendar.py" beforeDir="false" afterPath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/draw_calendar.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/template/calendar.html" beforeDir="false" afterPath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/template/calendar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/nonebot_plugin_starrail_calendar/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,6 +15,12 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="PUSH_TAGS">
+      <GitPushTagMode>
+        <option name="argument" value="--tags" />
+        <option name="title" value="All" />
+      </GitPushTagMode>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
@@ -80,10 +80,34 @@
       <workItem from="1697456300100" duration="946000" />
       <workItem from="1698151916553" duration="513000" />
     </task>
+    <task id="LOCAL-00001" summary="更新ctime错误">
+      <option name="closed" value="true" />
+      <created>1717939813505</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1717939813505</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="更新ctime错误" />
+    <option name="LAST_COMMIT_MESSAGE" value="更新ctime错误" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

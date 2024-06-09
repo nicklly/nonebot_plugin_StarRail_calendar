@@ -57,20 +57,6 @@ async def install_browser():
         main()
 
 
-@DRIVER.on_startup
-async def start_browser(**kwargs):
-    await get_browser(**kwargs)
-    logger.info('Playwright', '浏览器初始化成功')
-
-
-@DRIVER.on_shutdown
-async def shutdown_browser():
-    if _browser:
-        await _browser.close()
-    if _playwright:
-        await _playwright.stop()  # type: ignore
-
-
 @asynccontextmanager
 async def get_new_page(**kwargs) -> AsyncGenerator[Page, None]:
     assert _browser, "playwright尚未初始化"

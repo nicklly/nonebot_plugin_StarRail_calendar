@@ -1,4 +1,3 @@
-import re
 import jinja2
 
 from .browser import get_new_page
