@@ -1,52 +1,117 @@
-"""
-@Author         : yanyongyu
-@Date           : 2021-03-12 13:42:43
-@LastEditors    : yanyongyu
-@LastEditTime   : 2021-11-01 14:05:41
-@Description    : None
-@GitHub         : https://github.com/yanyongyu
-"""
-__author__ = "yanyongyu"
-
-from typing import Optional, AsyncIterator
 from contextlib import asynccontextmanager
+from contextlib import suppress
+from pathlib import Path
+from typing import Optional, Literal, Tuple, Union, List, AsyncGenerator, AsyncIterator
 
-from nonebot.log import logger
-from playwright.async_api import Page, Error, Browser, Playwright, async_playwright
+from nonebot import logger
+
+from .config import *
+from playwright.async_api import Page, Browser, Playwright, async_playwright, Error
 
 
-class ConfigError(Exception):
-    pass
-
-
-_browser: Optional[Browser] = None
 _playwright: Optional[Playwright] = None
+_browser: Optional[Browser] = None
+_browser_type = config.browser_type
 
 
 async def init(**kwargs) -> Browser:
     global _browser
     global _playwright
-    _playwright = await async_playwright().start()
     try:
+        _playwright = await async_playwright().start()
         _browser = await launch_browser(**kwargs)
+    except NotImplementedError:
+        logger.warning('Playwright', '初始化失败，请关闭FASTAPI_RELOAD')
     except Error:
         await install_browser()
         _browser = await launch_browser(**kwargs)
     return _browser
 
 
-async def launch_browser(proxy='', **kwargs) -> Browser:
-    assert _playwright is not None, "Playwright 没有安装"
-    if proxy:
-        kwargs["proxy"] = proxy
+async def launch_browser(**kwargs) -> Browser:
+    assert _playwright is not None, "Playwright is not initialized"
 
-    # 默认使用 chromium
-    logger.info("使用 chromium 启动")
-    return await _playwright.chromium.launch(**kwargs)
+    if _browser_type == 'firefox':
+        return await _playwright.firefox.launch(**kwargs)
+    elif _browser_type == 'chromium':
+        return await _playwright.chromium.launch(**kwargs)
+    elif _browser_type == 'webkit':
+        return await _playwright.webkit.launch(**kwargs)
 
 
 async def get_browser(**kwargs) -> Browser:
     return _browser or await init(**kwargs)
+
+
+async def install_browser():
+    import os
+    import sys
+
+    from playwright.__main__ import main
+
+    logger.info('Playwright', f'正在安装 {_browser_type}')
+    sys.argv = ["", "install", f"{_browser_type}"]
+    with suppress(SystemExit):
+        logger.info('Playwright', '正在安装依赖')
+        os.system("playwright install-deps")
+        main()
+
+
+@DRIVER.on_startup
+async def start_browser(**kwargs):
+    await get_browser(**kwargs)
+    logger.info('Playwright', '浏览器初始化成功')
+
+
+@DRIVER.on_shutdown
+async def shutdown_browser():
+    if _browser:
+        await _browser.close()
+    if _playwright:
+        await _playwright.stop()  # type: ignore
+
+
+@asynccontextmanager
+async def get_new_page(**kwargs) -> AsyncGenerator[Page, None]:
+    assert _browser, "playwright尚未初始化"
+    page = await _browser.new_page(**kwargs)
+    try:
+        yield page
+    finally:
+        await page.close()
+
+
+async def screenshot(url: str,
+                     *,
+                     elements: Optional[Union[List[str]]] = None,
+                     timeout: Optional[float] = 100000,
+                     wait_until: Literal["domcontentloaded", "load", "networkidle", "load", "commit"] = "networkidle",
+                     viewport_size: Tuple[int, int] = (1920, 1080),
+                     full_page=True,
+                     **kwargs):
+    if not url.startswith(('https://', 'http://')):
+        url = f'https://{url}'
+    viewport_size = {'width': viewport_size[0], 'height': viewport_size[1]}
+    brower = await get_browser()
+    page = await brower.new_page(
+        viewport=viewport_size,
+        **kwargs)
+    try:
+        await page.goto(url, wait_until=wait_until, timeout=timeout)
+        assert page
+        if not elements:
+            return await page.screenshot(timeout=timeout, full_page=full_page)
+        for e in elements:
+            card = await page.wait_for_selector(e, timeout=timeout, state='visible')
+            assert card
+            clip = await card.bounding_box()
+        return await page.screenshot(clip=clip, timeout=timeout, full_page=full_page, path='test.png')
+
+    except Exception as e:
+        raise e
+    finally:
+        if page:
+            await page.close()
 
 
 @asynccontextmanager
@@ -57,36 +122,3 @@ async def get_new_page(**kwargs) -> AsyncIterator[Page]:
         yield page
     finally:
         await page.close()
-
-
-async def shutdown_browser():
-    if _browser:
-        await _browser.close()
-    if _playwright:
-        await _playwright.stop()  # type: ignore
-
-
-async def install_browser():
-    import os
-    import sys
-
-    from playwright.__main__ import main
-
-    logger.info("使用镜像源进行下载")
-    os.environ[
-        "PLAYWRIGHT_DOWNLOAD_HOST"
-    ] = "https://npmmirror.com/mirrors/playwright/"
-    success = False
-
-    # 默认使用 chromium
-    logger.info("正在安装 chromium")
-    sys.argv = ["", "install", "chromium"]
-    try:
-        logger.info("正在安装依赖")
-        os.system("playwright install-deps")
-        main()
-    except SystemExit as e:
-        if e.code == 0:
-            success = True
-    if not success:
-        logger.error("浏览器更新失败, 请检查网络连通性")

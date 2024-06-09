@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-starrail-calendar"
-version = "1.0.7"
+version = "1.0.8"
 description = "查看《崩坏：星穹铁道》官方活动"
 authors = ["nicklly <1134741727@qq.com>"]
 readme = "README.md"

@@ -20,6 +20,7 @@ async def generate_day_schedule(server='cn', **kwargs):
     body.clear()
     weeks.clear()
     t = datetime.now()
+    has_prediction = False
 
     for i in range(7):
         d2 = (t + timedelta(days=i)).strftime("%Y-%m-%d")
@@ -36,25 +37,37 @@ async def generate_day_schedule(server='cn', **kwargs):
             'current': current
         })
 
+    for event in events:
+        if event['start_days'] > 0:
+            has_prediction = True
+
     template = env.get_template('calendar.html')
 
     for event in events:
-        if event['left_days'] < 0:
-            time = '永久开放'
-        else:
-            time = '即将结束' if event["left_days"] == 0 else f'{str(event["left_days"])}天后结束'
-        if event['start'] is None:
-            online = ''
-        else:
-            online = f'{event["start"]} - {datetime.strftime(event["end"], r"%m-%d")}'
+        if event['start_days'] <= 0:
+            if event['forever']:
+                time = '永久开放'
+            else:
+                time = '即将结束' if event["left_days"] == 0 else f'{str(event["left_days"])}天后结束'
+            body.append({
+                'title': event['title'],
+                'color': event['color'],
+                'banner': event['banner'],
+                'start': f'{datetime.strftime(event["start"], r"%m-%d")} ~ {datetime.strftime(event["end"], r"%m-%d")}',
+                'time': time
+            })
 
-        body.append({
-            'title': event['title'],
-            'color': event['color'],
-            'banner': event['banner'],
-            'online': online,
-            'time': time
-        })
+    if has_prediction:
+        for event in events:
+            if event['start_days'] > 0:
+                time = '即将开始' if event["start_days"] == 0 else f'{str(event["start_days"])}天后开始'
+                body.append({
+                    'title': event['title'],
+                    'start': f'{datetime.strftime(event["start"], r"%m-%d")} ~ {datetime.strftime(event["end"], r"%m-%d")}',
+                    'color': event['color'],
+                    'banner': event['banner'],
+                    'time': time
+                })
 
     content = await template.render_async(body=body, css_path=template_path, week=weeks)
 
