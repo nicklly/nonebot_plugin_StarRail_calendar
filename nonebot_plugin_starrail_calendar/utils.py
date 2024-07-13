@@ -5,14 +5,14 @@ from typing import Dict, Optional, Any, Union
 
 
 def load_data(data_file):
-    data_path = Path() / 'data' / 'star_rali_calendar' / data_file
+    data_path = Path(__file__).parent.parent / 'data' / data_file
     if not data_path.exists():
         save_data({}, data_file)
     return json.load(data_path.open('r', encoding='utf-8'))
 
 
 def save_data(data, data_file):
-    data_path = Path() / 'data' / 'star_rali_calendar' / data_file
+    data_path = Path(__file__).parent.parent / 'data' / data_file
     data_path.parent.mkdir(parents=True, exist_ok=True)
     json.dump(data, data_path.open('w', encoding='utf-8'), ensure_ascii=False, indent=2)
 
