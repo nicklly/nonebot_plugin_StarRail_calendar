@@ -1,6 +1,6 @@
 import logging
 import nonebot
-
+import re
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from nonebot import get_bot, on_command, on_regex
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, MessageEvent, Message, MessageSegment, ActionFailed
@@ -111,10 +111,6 @@ def update_group_schedule(group_id, group_data):
 
 @calendar.handle()
 async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = CommandArg()):
-    import re
-    if event.message_type == 'private':
-        await calendar.finish('仅支持群聊模式下使用本指令')
-
     group_id = str(event.group_id)
     group_data = load_data('data.json')
     fun = msg.extract_plain_text().strip()

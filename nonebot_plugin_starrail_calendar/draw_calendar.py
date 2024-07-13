@@ -46,7 +46,9 @@ async def generate_day_schedule(server='cn', **kwargs):
         if event['start'] is None:
             online = ''
         else:
-            online = f'{event["start"]} - {datetime.strftime(event["end"], r"%m-%d")}'
+            start = datetime.strftime(event["start"],r"%m-%d").lstrip('0').replace('-0','-')
+            end = datetime.strftime(event["end"], r"%m-%d").lstrip('0').replace('-0','-')
+            online = f'{start} - {end}'
 
         body.append({
             'title': event['title'],
