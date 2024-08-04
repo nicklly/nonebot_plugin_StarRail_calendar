@@ -111,8 +111,8 @@ def update_group_schedule(group_id, group_data):
 
 @calendar.handle()
 async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = CommandArg()):
-    group_id = str(event.group_id)
-    group_data = load_data('data.json')
+    group_id: str = str(event.group_id)
+    group_data: Dict[str, Any] = load_data('data.json')
     fun = msg.extract_plain_text().strip()
     action = re.search(r'(?P<action>on|off|time|status)', fun)
     if not fun:
@@ -126,6 +126,12 @@ async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = Comman
     elif action:
         # 设置推送时间
         if action.group('action') == 'time':
+
+            # 判断一下是否开启了推送
+            if group_id not in group_data.keys():
+                await calendar.finish("当前Q群尚未开启日历推送，无法设置推送时间", at_sender=True)
+                return
+
             match = str(msg).split(" ")
             time = re.search(r'(\d{1,2}):(\d{2})', match[1]) or re.search(r'(\d{1,2})：(\d{2})', match[1])
 
@@ -157,3 +163,39 @@ async def _(event: Union[GroupMessageEvent, MessageEvent], msg: Message = Comman
                 await calendar.finish(message)
             except KeyError as e:
                 await calendar.finish("当前Q群尚未开启日历推送，无法查看推送状态")
+
+        # 开启推送
+        elif action.group('action') == "on":
+            group_data[group_id] = {
+                'server_list': [
+                    str(server)
+                ],
+                'hour': 8,
+                'minute': 0,
+            }
+            if event.message_type == 'guild':
+                await push.finish("暂不支持频道内推送~")
+
+            if scheduler.get_job('starrali_calendar_' + group_id):
+                scheduler.remove_job("starrali_calendar_" + group_id)
+            save_data(group_data, 'data.json')
+
+            scheduler.add_job(
+                func=send_calendar,
+                trigger='cron',
+                hour=8,
+                minute=0,
+                id="starrali_calendar_" + group_id,
+                args=(group_id, group_data[group_id]),
+                misfire_grace_time=10
+            )
+
+            await push.finish('星穹日历推送已开启, 默认推送时间为8点\n修改推送时间请携带time参数与具体时间', at_sender=True)
+
+        # 关闭推送
+        elif action.group('action') == "off":
+            del group_data[group_id]
+            if scheduler.get_job("starrali_calendar_" + group_id):
+                scheduler.remove_job("starrali_calendar_" + group_id)
+            save_data(group_data, 'data.json')
+            await push.finish('星穹日历推送已关闭', at_sender=True)
